@@ -6,6 +6,8 @@ import Root from "./navigation/Root";
 import { useColorScheme } from "react-native";
 import { ThemeProvider } from "styled-components/native";
 import { darkTheme, lightTheme } from "./style";
+import { StatusBar } from "expo-status-bar";
+import { Platform } from "react-native";
 
 export default function App() {
   const isDark = useColorScheme() === "dark";
@@ -22,6 +24,7 @@ export default function App() {
   }
   return (
     <ThemeProvider theme={isDark ? darkTheme : lightTheme}>
+      {Platform.OS === "android" && <StatusBar hidden />}
       <NavigationContainer>
         <Root />
       </NavigationContainer>

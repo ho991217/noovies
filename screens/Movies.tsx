@@ -10,6 +10,10 @@ const Btn = styled.TouchableOpacity`
   background-color: ${(props) => props.theme.mainBgColor};
 `;
 
+const MovieText = styled.Text`
+  color: ${(props) => props.theme.mainTextColor};
+`;
+
 const Movies: React.FC<NativeStackScreenProps<any, "Movies">> = ({
   navigation: { navigate },
 }) => {
@@ -19,7 +23,7 @@ const Movies: React.FC<NativeStackScreenProps<any, "Movies">> = ({
         navigate("Stack", { screen: "One" });
       }}
     >
-      <Text>Movie</Text>
+      <MovieText>Movie</MovieText>
     </Btn>
   );
 };
