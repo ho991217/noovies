@@ -16,11 +16,11 @@ import { ThemeConsumer } from "styled-components/native";
 const Tab = createBottomTabNavigator();
 
 export default function Tabs() {
-  const isDark = useColorScheme() == "dark";
   return (
     <ThemeConsumer>
       {(theme) => (
         <Tab.Navigator
+          sceneContainerStyle={{ backgroundColor: theme.mainBgColor }}
           screenOptions={{
             tabBarStyle: {
               backgroundColor: theme.navBgColor,
