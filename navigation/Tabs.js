@@ -1,15 +1,8 @@
-import { StyleSheet, useColorScheme } from "react-native";
 import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Ionicons } from "@expo/vector-icons";
 import Tv from "../screens/Tv";
 import Search from "../screens/Search";
-import {
-  BLACK_COLOR,
-  DARKER_GRAY_COLOR,
-  GRAY_COLOR,
-  YELLOW_COLOR,
-} from "../colors";
 import Movies from "../screens/Movies";
 import { ThemeConsumer } from "styled-components/native";
 
