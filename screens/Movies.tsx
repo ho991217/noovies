@@ -17,8 +17,8 @@ import Slide from "../components/Slide";
 import Poster from "../components/Poster";
 import VMedia from "../components/VMedia";
 import HMedia from "../components/HMedia";
-
-const API_KEY = "ad7542e7f54260fb0df36e082050f503";
+import { useQuery, useQueryClient } from "react-query";
+import { MovieResponse, moviesApi, Movie } from "../api";
 
 const Container = styled.ScrollView`
   background-color: ${(props) => props.theme.mainBgColor};
@@ -38,65 +38,49 @@ const ListTitle = styled.Text`
   margin-bottom: 20px;
 `;
 
+const VSeperator = styled.View`
+  height: 30px;
+`;
+
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 const Movies: React.FC<NativeStackScreenProps<any, "Movies">> = ({
   navigation: { navigate },
 }) => {
-  const [refreshing, setRefreshing] = useState(false);
+  const queryClient = useQueryClient();
   const isDark = useColorScheme() === "dark";
-  const [loading, setLoading] = useState(true);
-  const [nowPlaying, setNowPlaying] = useState([]);
-  const [upcoming, setUpcoming] = useState([]);
-  const [trending, setTrending] = useState([]);
-
-  const getTrending = async () => {
-    const { results } = await (
-      await fetch(
-        `https://api.themoviedb.org/3/trending/movie/week?api_key=${API_KEY}`
-      )
-    ).json();
-    setTrending(results);
-  };
-
-  const getUpcoming = async () => {
-    const { results } = await (
-      await fetch(
-        `https://api.themoviedb.org/3/movie/upcoming?api_key=${API_KEY}&language=ko-KR&page=1&region=KR`
-      )
-    ).json();
-    setUpcoming(results);
-  };
-  const getNowPlaying = async () => {
-    const { results } = await (
-      await fetch(
-        `https://api.themoviedb.org/3/movie/now_playing?api_key=${API_KEY}&language=ko-KR&page=1&region=KR`
-      )
-    ).json();
-    setNowPlaying(results);
-  };
-
-  const getData = async () => {
-    // wait for all of them
-    await Promise.all([getTrending(), getNowPlaying(), getUpcoming()]);
-    setLoading(false);
-  };
+  const {
+    isLoading: nowPlayingLoading,
+    data: nowPlayingData,
+    isRefetching: isRetchingNowPlaying,
+  } = useQuery<MovieResponse>(["movies", "nowPlaying"], moviesApi.nowPlaying);
+  const {
+    isLoading: upcomingLoading,
+    data: upcomingData,
+    isRefetching: isRetchingUpcoming,
+  } = useQuery<MovieResponse>(["movies", "upcoming"], moviesApi.upcoming);
+  const {
+    isLoading: trendingLoading,
+    data: trendingData,
+    isRefetching: isRetchingTrending,
+  } = useQuery<MovieResponse>(["movies", "trending"], moviesApi.trending);
 
   const onRefresh = async () => {
-    setRefreshing(true);
-    await getData();
-    setRefreshing(false);
+    queryClient.refetchQueries(["movies"]);
   };
 
-  useEffect(() => {
-    getData();
-  }, []);
+  const refreshing =
+    isRetchingNowPlaying || isRetchingTrending || isRetchingUpcoming;
+
+  const loading = nowPlayingLoading || upcomingLoading || trendingLoading;
+
+  useEffect(() => {}, []);
 
   return loading ? (
     <LoaderView>
       <ActivityIndicator />
     </LoaderView>
-  ) : (
+  ) : upcomingData ? (
     <FlatList
       onRefresh={onRefresh}
       refreshing={refreshing}
@@ -118,11 +102,11 @@ const Movies: React.FC<NativeStackScreenProps<any, "Movies">> = ({
             paginationStyle={{ bottom: 10 }}
             activeDotColor={isDark ? "#E4E8ED" : "#30363D"}
           >
-            {nowPlaying.map((movie) => (
+            {nowPlayingData?.results.map((movie) => (
               <Slide
                 key={movie.id}
-                backdropPath={movie.backdrop_path}
-                posterPath={movie.poster_path}
+                backdropPath={movie.backdrop_path || ""}
+                posterPath={movie.poster_path || ""}
                 originalTitle={movie.original_title}
                 overview={movie.overview}
                 voteAverage={movie.vote_average}
@@ -130,24 +114,26 @@ const Movies: React.FC<NativeStackScreenProps<any, "Movies">> = ({
             ))}
           </Swiper>
           <ListTitle>인기 상영작</ListTitle>
-          <VMedia trending={trending} />
+          <VMedia trending={trendingData?.results} />
 
           <ListTitle>개봉 예정작</ListTitle>
         </>
       }
-      data={upcoming}
+      data={upcomingData.results}
       keyExtractor={(item) => item.id + ""}
-      ItemSeparatorComponent={() => <View style={{ height: 30 }} />}
-      renderItem={({ item }) => (
-        <HMedia
-          posterPath={item.poster_path}
-          originalTitle={item.original_title}
-          overview={item.overview}
-          releaseDate={item.release_date}
-        />
-      )}
+      ItemSeparatorComponent={VSeperator}
+      renderItem={({ item }) => {
+        return (
+          <HMedia
+            posterPath={item.poster_path || ""}
+            originalTitle={item.original_title}
+            overview={item.overview}
+            releaseDate={item.release_date}
+          />
+        );
+      }}
     />
-  );
+  ) : null;
 };
 
 export default Movies;

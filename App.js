@@ -5,9 +5,12 @@ import { NavigationContainer } from "@react-navigation/native";
 import Root from "./navigation/Root";
 import { useColorScheme } from "react-native";
 import { ThemeProvider } from "styled-components/native";
+import { QueryClient, QueryClientProvider } from "react-query";
 import { darkTheme, lightTheme } from "./style";
 import { StatusBar } from "expo-status-bar";
 import { Platform } from "react-native";
+
+const queryClient = new QueryClient();
 
 export default function App() {
   const isDark = useColorScheme() === "dark";
@@ -23,11 +26,13 @@ export default function App() {
     return <AppLoading />;
   }
   return (
-    <ThemeProvider theme={isDark ? darkTheme : lightTheme}>
-      {Platform.OS === "android" && <StatusBar hidden />}
-      <NavigationContainer>
-        <Root />
-      </NavigationContainer>
-    </ThemeProvider>
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider theme={isDark ? darkTheme : lightTheme}>
+        {Platform.OS === "android" && <StatusBar hidden />}
+        <NavigationContainer>
+          <Root />
+        </NavigationContainer>
+      </ThemeProvider>
+    </QueryClientProvider>
   );
 }

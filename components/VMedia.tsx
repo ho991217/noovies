@@ -45,33 +45,35 @@ const VMedia: React.FC = ({ trending }: Array) => {
   const isDark = useColorScheme() === "dark";
   return (
     <ListSection isDark={isDark}>
-      <TrendingScroll
-        horizontal
-        keyExtractor={(item) => item.id + ""}
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ paddingHorizontal: 30 }}
-        ItemSeparatorComponent={() => {
-          return <View style={{ width: 20 }} />;
-        }}
-        data={trending}
-        renderItem={({ item }) => (
-          <Movie key={item.id}>
-            <Poster path={item.poster_path} />
-            <Title numberOfLines={2}>
-              {item.original_title.slice(0, 24)}
-              {item.original_title.length > 24 && "..."}
-            </Title>
-            <Rating>
-              <Ionicons
-                name="ios-star"
-                size={10}
-                color={isDark ? "white" : "black"}
-              />
-              <Votes>{item.vote_average} / 10</Votes>
-            </Rating>
-          </Movie>
-        )}
-      />
+      {trending && (
+        <TrendingScroll
+          horizontal
+          keyExtractor={(item) => item.id + ""}
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{ paddingHorizontal: 30 }}
+          ItemSeparatorComponent={() => {
+            return <View style={{ width: 20 }} />;
+          }}
+          data={trending}
+          renderItem={({ item }) => (
+            <Movie key={item.id}>
+              <Poster path={item.poster_path} />
+              <Title numberOfLines={2}>
+                {item.original_title.slice(0, 24)}
+                {item.original_title.length > 24 && "..."}
+              </Title>
+              <Rating>
+                <Ionicons
+                  name="ios-star"
+                  size={10}
+                  color={isDark ? "white" : "black"}
+                />
+                <Votes>{item.vote_average} / 10</Votes>
+              </Rating>
+            </Movie>
+          )}
+        />
+      )}
     </ListSection>
   );
 };
