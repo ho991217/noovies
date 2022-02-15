@@ -1,6 +1,8 @@
 import styled from "styled-components/native";
 import React from "react";
 import Poster from "./Poster";
+import { useNavigation } from "@react-navigation/native";
+import { TouchableWithoutFeedback } from "react-native";
 
 const HMovie = styled.View`
   padding: 0px 30px;
@@ -38,6 +40,7 @@ interface HMediaProps {
   originalTitle: string;
   overview: string;
   releaseDate: string;
+  fullData: Object;
 }
 
 const HMedia: React.FC<HMediaProps> = ({
@@ -45,27 +48,41 @@ const HMedia: React.FC<HMediaProps> = ({
   originalTitle,
   overview,
   releaseDate,
+  fullData,
 }) => {
+  const navigation = useNavigation();
+  const gotoDetail = () => {
+    navigation.navigate("Stack", {
+      screen: "Detail",
+      params: {
+        ...fullData,
+      },
+    });
+  };
   return (
-    <HMovie>
-      <Poster path={posterPath} />
-      <HColumn>
-        <BigTitle>{originalTitle}</BigTitle>
-        <Release>
-          {new Date(releaseDate).toLocaleDateString("ko", {
-            month: "long",
-            day: "numeric",
-            year: "numeric",
-          })}
-        </Release>
-        <Overview>
-          {overview !== "" && overview.length > 100
-            ? overview.slice(0, 100)
-            : overview}
-          {overview.length > 100 && "..."}
-        </Overview>
-      </HColumn>
-    </HMovie>
+    <TouchableWithoutFeedback onPress={gotoDetail}>
+      <HMovie>
+        <Poster path={posterPath} />
+        <HColumn>
+          <BigTitle>{originalTitle}</BigTitle>
+          {releaseDate && (
+            <Release>
+              {new Date(releaseDate).toLocaleDateString("ko", {
+                month: "long",
+                day: "numeric",
+                year: "numeric",
+              })}
+            </Release>
+          )}
+          <Overview>
+            {overview !== "" && overview.length > 100
+              ? overview.slice(0, 100)
+              : overview}
+            {overview.length > 100 && "..."}
+          </Overview>
+        </HColumn>
+      </HMovie>
+    </TouchableWithoutFeedback>
   );
 };
 

@@ -1,10 +1,4 @@
-import {
-  ActivityIndicator,
-  FlatList,
-  RefreshControl,
-  ScrollView,
-  View,
-} from "react-native";
+import { FlatList } from "react-native";
 import { Dimensions } from "react-native";
 import React from "react";
 import styled from "styled-components/native";
@@ -19,18 +13,13 @@ import VMedia from "../components/VMedia";
 import HMedia from "../components/HMedia";
 import { useQuery, useQueryClient } from "react-query";
 import { MovieResponse, moviesApi, Movie } from "../api";
+import Loader from "../components/Loader";
 
 const Container = styled.ScrollView`
   background-color: ${(props) => props.theme.mainBgColor};
 `;
 
-const LoaderView = styled.View`
-  flex: 1;
-  align-items: center;
-  justify-content: center;
-`;
-
-const ListTitle = styled.Text`
+export const ListTitle = styled.Text`
   color: ${(props) => props.theme.mainTextColor};
   font-size: 16px;
   font-family: "Noto Sans Bold";
@@ -49,6 +38,7 @@ const Movies: React.FC<NativeStackScreenProps<any, "Movies">> = ({
 }) => {
   const queryClient = useQueryClient();
   const isDark = useColorScheme() === "dark";
+  const [refreshing, setRefreshing] = useState(false);
   const {
     isLoading: nowPlayingLoading,
     data: nowPlayingData,
@@ -66,20 +56,20 @@ const Movies: React.FC<NativeStackScreenProps<any, "Movies">> = ({
   } = useQuery<MovieResponse>(["movies", "trending"], moviesApi.trending);
 
   const onRefresh = async () => {
-    queryClient.refetchQueries(["movies"]);
+    setRefreshing(true);
+    await queryClient.refetchQueries(["movies"]);
+    setRefreshing(false);
   };
 
-  const refreshing =
-    isRetchingNowPlaying || isRetchingTrending || isRetchingUpcoming;
+  // const refreshing =
+  //   isRetchingNowPlaying || isRetchingTrending || isRetchingUpcoming;
 
   const loading = nowPlayingLoading || upcomingLoading || trendingLoading;
 
   useEffect(() => {}, []);
 
   return loading ? (
-    <LoaderView>
-      <ActivityIndicator />
-    </LoaderView>
+    <Loader />
   ) : upcomingData ? (
     <FlatList
       onRefresh={onRefresh}
@@ -110,11 +100,12 @@ const Movies: React.FC<NativeStackScreenProps<any, "Movies">> = ({
                 originalTitle={movie.original_title}
                 overview={movie.overview}
                 voteAverage={movie.vote_average}
+                fullData={movie}
               />
             ))}
           </Swiper>
           <ListTitle>인기 상영작</ListTitle>
-          <VMedia trending={trendingData?.results} />
+          <VMedia fullData={trendingData} />
 
           <ListTitle>개봉 예정작</ListTitle>
         </>
@@ -129,6 +120,7 @@ const Movies: React.FC<NativeStackScreenProps<any, "Movies">> = ({
             originalTitle={item.original_title}
             overview={item.overview}
             releaseDate={item.release_date}
+            fullData={item}
           />
         );
       }}

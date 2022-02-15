@@ -1,8 +1,16 @@
 import styled from "styled-components/native";
 import React from "react";
-import { FlatList, Text, useColorScheme, View } from "react-native";
+import {
+  FlatList,
+  Text,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  useColorScheme,
+  View,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import Poster from "./Poster";
+import { useNavigation } from "@react-navigation/native";
 
 const ListSection = styled.View<{ isDark: boolean }>`
   background-color: ${(props) =>
@@ -41,11 +49,20 @@ const Title = styled.Text`
   text-align: center;
 `;
 
-const VMedia: React.FC = ({ trending }: Array) => {
+const VMedia: React.FC = ({ fullData }) => {
   const isDark = useColorScheme() === "dark";
+  const navigation = useNavigation();
+  const gotoDetail = (data) => {
+    navigation.navigate("Stack", {
+      screen: "Detail",
+      params: {
+        ...data,
+      },
+    });
+  };
   return (
     <ListSection isDark={isDark}>
-      {trending && (
+      {fullData && (
         <TrendingScroll
           horizontal
           keyExtractor={(item) => item.id + ""}
@@ -54,23 +71,27 @@ const VMedia: React.FC = ({ trending }: Array) => {
           ItemSeparatorComponent={() => {
             return <View style={{ width: 20 }} />;
           }}
-          data={trending}
+          data={fullData.results}
           renderItem={({ item }) => (
-            <Movie key={item.id}>
-              <Poster path={item.poster_path} />
-              <Title numberOfLines={2}>
-                {item.original_title.slice(0, 24)}
-                {item.original_title.length > 24 && "..."}
-              </Title>
-              <Rating>
-                <Ionicons
-                  name="ios-star"
-                  size={10}
-                  color={isDark ? "white" : "black"}
-                />
-                <Votes>{item.vote_average} / 10</Votes>
-              </Rating>
-            </Movie>
+            <TouchableWithoutFeedback onPress={() => gotoDetail(item)}>
+              <Movie key={item.id}>
+                <Poster path={item.poster_path} />
+                <Title numberOfLines={2}>
+                  {item.original_title
+                    ? item.original_title.slice(0, 24)
+                    : item.original_name.slice(0, 24)}
+                  {item.original_title?.length > 24 && "..."}
+                </Title>
+                <Rating>
+                  <Ionicons
+                    name="ios-star"
+                    size={10}
+                    color={isDark ? "white" : "black"}
+                  />
+                  <Votes>{item.vote_average} / 10</Votes>
+                </Rating>
+              </Movie>
+            </TouchableWithoutFeedback>
           )}
         />
       )}

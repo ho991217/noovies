@@ -1,7 +1,13 @@
+import { useNavigation } from "@react-navigation/native";
 import { BlurView } from "expo-blur";
 import React from "react";
-import { Platform, useColorScheme } from "react-native";
+import {
+  Platform,
+  TouchableWithoutFeedback,
+  useColorScheme,
+} from "react-native";
 import styled from "styled-components/native";
+import { Movie } from "../api";
 import { makeImgPath } from "../utils";
 import Poster from "./Poster";
 
@@ -53,6 +59,7 @@ interface SlideProps {
   originalTitle: string;
   overview: number;
   voteAverage: string;
+  fullData: Movie;
 }
 
 const Slide: React.FC<SlideProps> = ({
@@ -61,8 +68,18 @@ const Slide: React.FC<SlideProps> = ({
   originalTitle,
   overview,
   voteAverage,
+  fullData,
 }) => {
   const isDark = useColorScheme() === "dark";
+  const navigation = useNavigation();
+  const gotoDetail = () => {
+    navigation.navigate("Stack", {
+      screen: "Detail",
+      params: {
+        ...fullData,
+      },
+    });
+  };
   return (
     <ViewContainer>
       <BgImg source={{ uri: makeImgPath(backdropPath) }}></BgImg>
@@ -71,16 +88,18 @@ const Slide: React.FC<SlideProps> = ({
         intensity={Platform.OS === "ios" ? 50 : 100}
         style={{ width: "100%", height: "100%", position: "absolute" }}
       >
-        <Wrapper>
-          <Poster path={posterPath} />
-          <Column>
-            <Title isDark={isDark}>{originalTitle}</Title>
-            <Overview isDark={isDark} numberOfLines={3}>
-              {overview}
-            </Overview>
-            <Votes isDark={isDark}>{voteAverage} / 10</Votes>
-          </Column>
-        </Wrapper>
+        <TouchableWithoutFeedback onPress={gotoDetail}>
+          <Wrapper>
+            <Poster path={posterPath} />
+            <Column>
+              <Title isDark={isDark}>{originalTitle}</Title>
+              <Overview isDark={isDark} numberOfLines={3}>
+                {overview}
+              </Overview>
+              <Votes isDark={isDark}>{voteAverage} / 10</Votes>
+            </Column>
+          </Wrapper>
+        </TouchableWithoutFeedback>
       </BlurView>
     </ViewContainer>
   );
